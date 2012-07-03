@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>GoSyslog</title>
+
+	<link href="/static/css/layout.css" rel="stylesheet" type="text/css">
+	<script language="javascript" type="text/javascript" src="/static/js/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="/static/js/jlinq.js"></script>
+
+
+    <script type="text/javascript" charset="utf-8">
+        var _lastid = 0;
+        var _filter = "";
+
+         $(document).ready(function(){
+             t = setInterval(function() {
+                fetchData(_filter)
+            }, 1000);
+
+            //$("#form-filter").submit(function(e) {})
+
+            $("#form-filter input").bind('keypress', function(e) {
+                if (e.keyCode == 13) {
+                    _filter = $("#filter-text").val();
+                    $("#syslog-body").empty()
+                    return false
+                }
+            });
+        });
+ 
+        function fetchData (filter) {
+            $.getJSON('data?lastid='+_lastid, function(data) {
+                if (data.Messages.length > 0) {
+                    if (filter != "") {
+                        filter = "filtered = jlinq.from(data.Messages)."+filter+".select();";
+
+                        eval(filter)
+                    } else {
+                        filtered = data.Messages
+                    }
+
+                    $.each(filtered, function(key, val) {
+                        var date = new Date(val.Timestamp * 1000);
+                        $('<tr id='+val.Id+' class="severity-'+val.Severity+'"><td>' +date.toUTCString() +'</td><td class="td-source">'+ val.Source + '</td><td>'+val.Message+'</td></tr>').hide().prependTo('#syslog tbody').show("slow");
+                    });
+
+                    _lastid = data.Messages[0].Id;
+                }
+
+
+                $( 'li:gt(' + ( 100 ) + ')' ).remove();
+
+            });
+        }
+    </script>
+
+
+</head>
+<body>
+	<h1>GoSyslog</h1>
+
+    <form id="form-filter">
+        <input type="text" id="filter-text" value="" />
+    </form>
+
+    <table id="syslog">
+        <thead>
+            <th id="sys-date">Date</th><th id="sys-source">Source</th><th id="sys-msg">Message</th>
+        </thead>
+        <tbody id="syslog-body">
+        </tbody>
+    </table>
+
+</body>
+</html>

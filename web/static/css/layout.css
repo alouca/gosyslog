@@ -1,0 +1,66 @@
+body {
+    font: normal 16px Arial, Helvetica, Sans-Serif;
+}
+
+ul {
+    list-style: none;
+    padding: 5px;
+    margin: 5px;
+}
+
+td {
+    padding: 5px;
+    border-bottom: 1px #ccc solid;
+}
+
+td.td-source {
+    text-align: center;
+}
+
+#sys-date {
+    width: 250px;
+}
+
+#sys-source {
+    width: 150px;
+}
+
+/* Emergency */
+.severity-0 {
+    background-color: #fbb5bc;
+}
+
+/* Alert */
+.severity-1 {
+
+}
+
+/* Critical */
+.severity-2 {
+
+}
+
+/* Error */
+.severity-3 {
+    background-color: ;
+}
+
+/* Warning */
+.severity-4 {
+    background-color: #fffbb8;
+}
+
+/* Notice */
+.severity-5 {
+
+}
+
+/* Informational */
+.severity-6 {
+    background-color: #bdf3af;
+}
+
+/* Debug */
+.severity-7 {
+    background-color: #bdf3af;
+}
