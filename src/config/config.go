@@ -12,8 +12,8 @@ var (
 )
 
 type Config struct {
-	data     map[string]interface{}
-	filename string
+	data		map[string]interface{}
+	filename	string
 }
 
 func LoadConfigFromFile(file string) (cfg *Config) {
@@ -80,12 +80,10 @@ func (x *Config) GetBool(key string) bool {
 		if v == "yes" {
 			return true
 		}
-	} 
-	
+	}
+
 	return false
 }
-
-
 
 // Returns an array for the config variable key
 func (x *Config) GetArray(key string) []interface{} {

@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/mattn/go-session-manager"
 	"html/template"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -25,10 +27,25 @@ type JSONLiveData struct {
 	Messages []SyslogMessage
 }
 
+var (
+	manager *session.SessionManager
+)
+
 func startServer(port string) {
+	manager = session.NewSessionManager(nil)
+
+	manager.OnStart(func(session *session.Session) {
+		l.Debug("Session Manager: Started a new session.\n")
+	})
+	manager.OnEnd(func(session *session.Session) {
+		l.Debug("Session Manager: Destroyed a session.\n")
+	})
+	manager.SetTimeout(10)
+
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static/"))))
 	http.HandleFunc("/data", DataHandler)
 	http.HandleFunc("/", IndexHandler)
+	http.HandleFunc("/login", LoginHandler)
 	var e error
 
 	t, e = template.ParseGlob("web/templates/*.tmpl")
@@ -41,6 +58,48 @@ func startServer(port string) {
 
 	if e != nil {
 		l.Fatal("Unable to start embeeded webserver: %s\n", e.Error())
+	}
+}
+
+type LoginFormData struct {
+	NotificationTitle	string
+	Notification		string
+}
+
+func LoginHandler(w http.ResponseWriter, req *http.Request) {
+	session := manager.GetSession(w, req)
+	t, e := template.ParseGlob("web/templates/*.tmpl")
+	if e != nil {
+		l.Fatal("Unable to parse templates: %s\n", e.Error())
+	}
+
+	err := req.ParseForm()
+
+	if err != nil {
+		l.Fatal("Unable to parse HTTP Form: %s\n", err.Error())
+		return
+	}
+
+	username := strings.ToLower(req.FormValue("username"))
+	password := req.FormValue("password")
+
+	if username != "" {
+		if user, ok := settings.Users[username]; ok {
+			if user.Password == password {
+				session.Value = make(map[string]string)
+				http.Redirect(w, req, "/", http.StatusFound)
+			} else {
+				e = t.ExecuteTemplate(w, "login", LoginFormData{"Error Logging in", "No such username/password combination exists."})
+
+			}
+		}
+	} else {
+		e = t.ExecuteTemplate(w, "login", nil)
+
+	}
+
+	if e != nil {
+		l.Fatal("Error executing template: %s\n", e.Error())
 	}
 }
 
@@ -92,13 +151,21 @@ func DataHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func IndexHandler(w http.ResponseWriter, req *http.Request) {
+	session := manager.GetSession(w, req)
+
+	// Check if user is logged in
+	if session.Value == nil {
+		http.Redirect(w, req, "/login", http.StatusFound)
+		return
+	}
+
 	t, e := template.ParseGlob("web/templates/*.tmpl")
 
 	if e != nil {
 		l.Fatal("Unable to parse templates: %s\n", e.Error())
 	}
 
-	e = t.Execute(w, nil)
+	e = t.ExecuteTemplate(w, "index", nil)
 
 	if e != nil {
 		l.Fatal("Error executing template: %s\n", e.Error())

@@ -1,0 +1,82 @@
+{{define "login"}}
+<!doctype html>
+<head>
+	<meta charset="UTF-8">
+	<title>Login | GoSyslog</title>
+	<meta name="description" content="gosyslog-login">
+	<meta name="author" content="Andreas Louca">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+	<!-- CSS Styles -->
+	<link rel="stylesheet" href="/static/css/style.css">
+	<link rel="stylesheet" href="/static/css/colors.css">
+	<link rel="stylesheet" href="/static/css/jquery.tipsy.css">
+	
+	<!-- Google WebFonts -->
+	<link href='http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic' rel='stylesheet' type='text/css'>
+	
+	<script src="/static/js/libs/modernizr-1.7.min.js"></script>
+</head>
+<body class="login">
+	<section role="main">
+	
+		<a href="/" title="Back to Homepage"></a>
+	
+		<!-- Login box -->
+		<article id="login-box">
+		
+			<div class="article-container">
+			
+				<p>Welcome to GoSyslog.<br/>Please enter your username/password to proceed.</p>
+				{{if .Notification}}
+				<!-- Notification -->
+				<div class="notification error">
+					<a href="#" class="close-notification" title="Hide Notification" rel="tooltip">x</a>
+					<p><strong>{{.NotificationTitle}}</strong> {{.Notification}}</p>
+				</div>
+				<!-- /Notification -->
+				{{end}}
+			
+				<form action="/login" method="post">
+					<fieldset>
+						<dl>
+							<dt>
+								<label>Login</label>
+							</dt>
+							<dd>
+								<input type="text" name="username" class="large">
+							</dd>
+							<dt>
+								<label>Password</label>
+							</dt>
+							<dd>
+								<input type="password" name="password" class="large">
+							</dd>
+							<dt class="checkbox"><label>Remeber me</label></dt>
+							<dd><input type="checkbox"></dd>
+						</dl>
+					</fieldset>
+					<button type="submit" class="right">Log in</button>
+				</form>
+			
+			</div>
+		
+		</article>
+		<!-- /Login box -->
+		<ul class="login-links">
+			<li><a href="#">Lost password?</a></li>
+			<li><a href="#">Wiki</a></li>
+			<li><a href="#">Back to page</a></li>
+		</ul>
+		
+	</section>
+
+	<!-- JS Libs at the end for faster loading -->
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/libs/selectivizr.js"></script>
+	<script src="/static/js/jquery/jquery.tipsy.js"></script>
+	<script src="/static/js/login.js"></script>
+</body>
+</html>
+
+{{end}}
