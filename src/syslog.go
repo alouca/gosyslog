@@ -31,7 +31,7 @@ type SyslogAccountSettings struct {
 	EmailEnabled	bool
 	EmailAddress	string
 	// Filters
-	Filters	map[string][]SyslogFilter
+	Filters	map[string][]*SyslogFilter
 }
 
 type SyslogSettings struct {
@@ -131,6 +131,20 @@ func loadSettings() {
 	if err != nil {
 		l.Fatal("Unable to parse settings file: %s\n", err.Error())
 	}
+
+	prepareSettings()
+}
+
+func prepareSettings() {
+	// Loop & Compile all regular expressions
+	for _, user := range settings.Users {
+		for host, filters := range user.Filters {
+			for _, filter := range filters {
+				l.Debug("Compiling pattern [%s] %s for %s\n", host, filter.Expression, user.Username)
+				filter.RegExp = regexp.MustCompile(filter.Expression)
+			}
+		}
+	}
 }
 
 func main() {
@@ -179,6 +193,7 @@ func main() {
 
 	for {
 		var buffer [1500]byte
+		l.Debug("Attempt to read\n")
 		readBytes, addr, err := pc.ReadFrom(buffer[0:])
 
 		if err != nil {
@@ -223,8 +238,7 @@ func processFilter(user SyslogAccountSettings, event SyslogEvent) {
 	// If we have filters for this particular source, evaluate them
 	if filter, ok := user.Filters[event.Source]; ok {
 		for _, f := range filter {
-			l.Debug("Trying to compile %s\n", f.Expression)
-			f.RegExp = regexp.MustCompile(f.Expression)
+			// If regexp did not fail to compile, try to run it
 			if f.RegExp != nil {
 				if f.RegExp.Match([]byte(event.Message)) {
 					l.Debug("Expression %s matched on %s\n", f.Expression, event.Message)
@@ -240,7 +254,7 @@ func processFilter(user SyslogAccountSettings, event SyslogEvent) {
 					}
 				}
 			} else {
-				l.Debug("Compilation of expression %s has failed.", f.Expression)
+				l.Debug("No compiled expression for %s.", f.Expression)
 			}
 		}
 	}
