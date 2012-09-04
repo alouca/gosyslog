@@ -4,7 +4,7 @@
     "logger.output": "stdout",
     "settings.path": "conf/settings.json",
     "webserver.address": ":8080",
-    "xmpp.username": "yasser@xmpp.cablenet-as.net",
-    "xmpp.password": "wave$551",
-    "xmpp.server": "xmpp.cablenet-as.net:5223"
+    "xmpp.username": "yasser@test.com",
+    "xmpp.password": "asdasd",
+    "xmpp.server": "xmpp.test.com:5223"
 }
